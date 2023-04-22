@@ -38,16 +38,31 @@ function App() {
       contactValue,
       stockTicker,
       threshold,
-      frequency,
     })
       .then((response) => {
         console.log(response.data);
-        setCards(response.data);
       })
       .catch((error) => {
         console.error(error);
       });
   };
+
+  const fetchStocks = async () => {
+    try {
+      const response = await axios.get(`http://localhost:5000/getstock`);
+        setCards(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      fetchStocks();
+    }, frequency === 'hourly' ? 3600000 : frequency === 'daily' ? 86400000 : 604800000);
+
+    return () => clearInterval(intervalId);
+  }, [frequency, stockTicker]);
 
   return (
     <div className="App">
