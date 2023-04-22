@@ -1,6 +1,6 @@
 flask
 flask_cors
-Flask-Mail
 yfinance
 twilio
 python-dotenv
+requests

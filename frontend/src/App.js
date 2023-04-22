@@ -8,7 +8,7 @@ function App() {
   const [stockTicker, setStockTicker] = useState('');
   const [threshold, setThreshold] = useState('');
   const [frequency, setFrequency] = useState('');
-  const [cards, setCards] = useState([]);
+  const [card, setCard] = useState([]);
 
   const handleContactTypeChange = (event) => {
     setContactType(event.target.value);
@@ -31,6 +31,13 @@ function App() {
     setFrequency(event.target.value);
   };
 
+  const frequency_map=  {
+    'minutely': 60000,
+    'hourly': 3600000,
+    'daily': 86400000,
+    'monthly': 2592000000
+  }
+
   const handleSubmit = (event) => {
     event.preventDefault();
     axios.post('http://localhost:5000/subscribe', {
@@ -41,6 +48,9 @@ function App() {
     })
       .then((response) => {
         console.log(response.data);
+        // Call fetchStocks function periodically
+        const interval = setInterval(fetchStocks, frequency_map[frequency]);
+        return () => clearInterval(interval);
       })
       .catch((error) => {
         console.error(error);
@@ -50,19 +60,12 @@ function App() {
   const fetchStocks = async () => {
     try {
       const response = await axios.get(`http://localhost:5000/getstock`);
-        setCards(response.data);
+      setCard(response.data);
     } catch (error) {
       console.error(error);
     }
   };
 
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      fetchStocks();
-    }, frequency === 'hourly' ? 3600000 : frequency === 'daily' ? 86400000 : 604800000);
-
-    return () => clearInterval(intervalId);
-  }, [frequency, stockTicker]);
 
   return (
     <div className="App">
@@ -118,9 +121,9 @@ function App() {
             <label>Frequency:</label>
             <select value={frequency} onChange={handleFrequencyChange}>
               <option value="">Select Frequency</option>
-              <option value="daily">Minutely</option>
-              <option value="weekly">Hourly</option>
-              <option value="monthly">Daily</option>
+              <option value="minutely">Minutely</option>
+              <option value="hourly">Hourly</option>
+              <option value="daily">Daily</option>
               <option value="monthly">Monthly</option>
             </select>
           </div>
@@ -130,24 +133,22 @@ function App() {
         </form>
       </div>
       <div className="card-container">
-        {cards.map((card, index) => (
-          <div key={index} className="card">
+          <div className="card">
             <div className="card-header">
-              {card.stockTicker} - {card.threshold}
+              {card.companyName}
             </div>
             <div className="card-body">
               <div className="card-data">
-                Last Price: {card.lastPrice}
+                Last Price: {card.currentPrice}
               </div>
               <div className="card-data">
-                Change: {card.change}
+                Address: {card.address}
               </div>
               <div className="card-data">
-                Date: {card.date}
+                Industry: {card.industry}
               </div>
             </div>
           </div>
-        ))}
       </div>
     </div>
   );
