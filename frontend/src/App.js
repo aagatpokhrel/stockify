@@ -132,24 +132,6 @@ function App() {
           </div>
         </form>
       </div>
-      <div className="card-container">
-          <div className="card">
-            <div className="card-header">
-              {card.companyName}
-            </div>
-            <div className="card-body">
-              <div className="card-data">
-                Last Price: {card.currentPrice}
-              </div>
-              <div className="card-data">
-                Address: {card.address}
-              </div>
-              <div className="card-data">
-                Industry: {card.industry}
-              </div>
-            </div>
-          </div>
-      </div>
     </div>
   );
 }

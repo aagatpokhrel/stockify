@@ -3,7 +3,7 @@
   --text-color: white;
   --button-color: #00986f;
   --button-hover-color: #00a87f;
-  --font-size: 12px;
+  --font-size: 16px;
 }
 
 .App {
@@ -12,9 +12,10 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-start;
+  justify-content: flex-start;
   font-size: var(--font-size);
+  padding: 2rem;
 }
 
 .form-container {
@@ -24,15 +25,14 @@
   gap: 2rem;
   justify-content: center;
   margin-bottom: 2rem;
-}
-
-.notify-form {
-  background-color: #f9f9f9;
+  width: 100%;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 2rem;
+  background-color: #0f1113;
   border-radius: 10px;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-  padding: 2rem;
-  width: 80%;
-  max-width: 600px;
 }
 
 .form-group {
@@ -58,78 +58,25 @@
 
 .frequency-select {
   width: 100%;
+  font-size: 1.1em; /* Increased font size */
+  padding: 0.5em; /* Adjusted padding */
+  border-radius: 5px; /* Added border radius */
+  border: none;
+  background: #f5f5f5;
 }
 
 .submit {
   margin-top: 10px;
   background-color: var(--button-color);
-  color: white
-}
-.submit:hover {
-  background-color: var(--button-hover-color);
+  color: white;
+  border: none;
+  padding: 1em; /* Adjusted padding */
+  border-radius: 5px; /* Added border radius */
+  cursor: pointer;
+  transition: all 0.3s ease-in-out; /* Added animation */
 }
 
-.cards-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-  padding: 2rem;
-  }
-  
-  .card {
-  background-color: var(--card-background-color);
-  color: var(--card-text-color);
-  border-radius: var(--card-border-radius);
-  padding: 1rem;
-  box-shadow: var(--card-box-shadow);
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  }
-  
-  .card-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  }
-  
-  .card-heading h3 {
-  margin: 0;
-  }
-  
-  .card-heading button {
-  background-color: var(--card-button-background-color);
-  color: var(--card-button-text-color);
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: var(--card-button-border-radius);
-  cursor: pointer;
-  }
-  
-  .card-content {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  }
-  
-  .card-content span {
-  font-weight: bold;
-  }
-  
-  .card-footer {
-  display: flex;
-  justify-content: flex-end;
-  }
-  
-  .card-footer button {
-  background-color: var(--card-button-background-color);
-  color: var(--card-button-text-color);
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: var(--card-button-border-radius);
-  cursor: pointer;
-  }
-  
-  .card-footer button:first-child {
-  margin-right: 1rem;
-  }
+.submit:hover {
+  background-color: var(--button-hover-color);
+  transform: translateY(-3px); /* Added animation */
+}
