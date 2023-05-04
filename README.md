@@ -52,20 +52,6 @@ For backend
 | `threshold` |	`float` |	**Required**. Price threshold to be notified
 | `frequency` |	`string` |	**Required**. Frequency of notifications
 
-#### GetStock
-
-```http
-  GET /getstock
-```
-The response will be a JSON object with the following fields:
-
-| Field Name | Type     | Description                       |
-| :-------- | :------- | :-------------------------------- |
-| `companyName` |	`string` |	Name of the company |
-| `address` |	`string` |	Address of the company |
-| `industry` |	`string` |	Industry of the company |
-| `currentPrice` | 	`float`	| Current stock price of the subscribed ticker |
-
 
 ## Screenshots
 
