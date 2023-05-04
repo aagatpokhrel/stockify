@@ -8,7 +8,6 @@ function App() {
   const [stockTicker, setStockTicker] = useState('');
   const [threshold, setThreshold] = useState('');
   const [frequency, setFrequency] = useState('');
-  const [card, setCard] = useState([]);
 
   const handleContactTypeChange = (event) => {
     setContactType(event.target.value);
@@ -40,32 +39,22 @@ function App() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    frequency_val = frequency_map[frequency];
     axios.post('http://localhost:5000/subscribe', {
       contactType,
       contactValue,
       stockTicker,
       threshold,
+      frequency_val,
     })
       .then((response) => {
         console.log(response.data);
-        // Call fetchStocks function periodically
-        const interval = setInterval(fetchStocks, frequency_map[frequency]);
-        return () => clearInterval(interval);
+        
       })
       .catch((error) => {
         console.error(error);
       });
   };
-
-  const fetchStocks = async () => {
-    try {
-      const response = await axios.get(`http://localhost:5000/getstock`);
-      setCard(response.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
 
   return (
     <div className="App">
