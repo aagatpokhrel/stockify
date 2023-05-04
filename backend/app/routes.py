@@ -107,18 +107,9 @@ def predict_stock(hist):
         future_predictions.append(y_pred_actual[0][0])
         last_60_days_scaled = np.vstack([last_60_days_scaled[1:], y_pred])
 
-    # Plot the predicted values
+    return future_predictions
     
-    fig,ax = plt.subplots(figsize=(16,8))
-    ax.plot(hist['Close'])
-    ax.plot(np.arange(len(hist['Close']), len(hist['Close']) + len(future_predictions)), future_predictions)
-    ax.set_title('Predicted Stock Prices')
-    ax.set_xlabel('Date')
-    ax.set_ylabel('Close Price')
-    ax.legend(['Actual', 'Predicted'])
-    ax.set_xticklabels(hist['Date'])
-    plt.xticks(rotation=45)
-    fig.savefig(f'generated_graph.png')
+    
 
 @app.route('/')
 def index():
@@ -132,7 +123,19 @@ def subscribe():
         subscribers = data
         stock = yf.Ticker(subscribers['stockTicker'])
         hist = stock.history(period='12mo')
-        predict_stock(hist)
+        future_predictions = predict_stock(hist)
+
+        fig,ax = plt.subplots(figsize=(16,8))
+        ax.plot(hist['Close'])
+        ax.plot(np.arange(len(hist['Close']), len(hist['Close']) + len(future_predictions)), future_predictions)
+        ax.set_title('Predicted Stock Prices')
+        ax.set_xlabel('Date')
+        ax.set_ylabel('Close Price')
+        ax.legend(['Actual', 'Predicted'])
+        ax.set_xticklabels(hist['Date'])
+        plt.xticks(rotation=45)
+        fig.savefig(f'generated_graph.png')
+        
         return send_file('generated_graph.png', mimetype='image/png')
     else:
         return jsonify({'message': 'Error'})
