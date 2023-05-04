@@ -4,3 +4,6 @@ yfinance
 twilio
 python-dotenv
 requests
+tensorflow
+sklearn
+matplotlib

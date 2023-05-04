@@ -7,6 +7,9 @@ import requests
 import dotenv
 import os
 
+from threading import Thread
+import time
+
 import numpy as np
 import math
 from sklearn.preprocessing import MinMaxScaler 
@@ -15,8 +18,8 @@ from tensorflow.keras import layers
 import matplotlib.pyplot as plt
 dotenv.load_dotenv()
 
+
 global subscribers
-global future_predictions
 account_sid = os.getenv("TWILIO_ID")
 auth_token = os.getenv("TWILIO_TOKEN")
 client = Client(account_sid, auth_token)
@@ -98,7 +101,6 @@ def predict_stock(hist):
     # Get the last 60 days of closing prices
     last_60_days = hist['Close'][-60:].values.reshape(-1, 1)
     last_60_days_scaled = scaler.transform(last_60_days)
-    global future_predictions
     future_predictions = []
     for i in range(30):
         X_test = np.reshape(last_60_days_scaled, (1, last_60_days_scaled.shape[0], 1))
@@ -109,7 +111,32 @@ def predict_stock(hist):
 
     return future_predictions
     
-    
+def getstock():
+    global subscribers
+    stock = yf.Ticker(subscribers['stockTicker'])
+    hist = stock.history(period='12mo')
+    future_predictions = predict_stock(hist)
+    checker = (future_predictions[0] - int(subscribers['threshold']))*(hist['Close'].values[0]-int(subscribers['threshold']))
+    if (checker<0):
+        if future_predictions[0] > int(subscribers['threshold']):
+            if subscribers['contactType'] == 'email':
+                send_email(subscribers['contactValue'], loss=False)
+            elif subscribers['contactType'] == 'phone':
+                send_message(subscribers['contactValue'], loss=False)
+        if future_predictions[0] < int(subscribers['threshold']):
+            if subscribers['contactType'] == 'email':
+                send_email(subscribers['contactValue'], loss=True)
+            elif subscribers['contactType'] == 'phone':
+                send_message(subscribers['contactValue'], loss=True)
+    else:
+        pass
+
+def frequency_scheduler():
+    global subscribers
+    frequency = subscribers['frequency']/1000
+    while True:
+        time.sleep(frequency)
+        getstock()
 
 @app.route('/')
 def index():
@@ -126,35 +153,23 @@ def subscribe():
         future_predictions = predict_stock(hist)
 
         fig,ax = plt.subplots(figsize=(16,8))
-        ax.plot(hist['Close'])
-        ax.plot(np.arange(len(hist['Close']), len(hist['Close']) + len(future_predictions)), future_predictions)
-        ax.set_title('Predicted Stock Prices')
+        stock_close_values = hist['Close'].values
+        ax.plot(stock_close_values)
+        ax.plot(np.arange(len(stock_close_values), len(stock_close_values) + len(future_predictions)), future_predictions)
+        ax.set_title('Analysis of Stock at subscription')
         ax.set_xlabel('Date')
-        ax.set_ylabel('Close Price')
+        ax.set_ylabel('Closing Price')
         ax.legend(['Actual', 'Predicted'])
-        ax.set_xticklabels(hist['Date'])
+        date = hist['Close'].keys()
+        ax.set_xticklabels(date)
         plt.xticks(rotation=45)
         fig.savefig(f'generated_graph.png')
-        
+
         return send_file('generated_graph.png', mimetype='image/png')
     else:
         return jsonify({'message': 'Error'})
 
-@app.route('/getstock', methods=['GET'])
-def getstock():
-    global subscribers
-    global future_predictions
-    if future_predictions[0] > int(subscribers['threshold']):
-        if subscribers['contactType'] == 'email':
-            send_email(subscribers['contactValue'], loss=False)
-        elif subscribers['contactType'] == 'phone':
-            send_message(subscribers['contactValue'], loss=False)
-    if future_predictions[0] < int(subscribers['threshold']):
-        if subscribers['contactType'] == 'email':
-            send_email(subscribers['contactValue'], loss=True)
-        elif subscribers['contactType'] == 'phone':
-            send_message(subscribers['contactValue'], loss=True)
-    
-    return subscribers
-    
-
+# Start the background process as a daemon thread
+background_thread = Thread(target=frequency_scheduler)
+background_thread.daemon = True
+background_thread.start()
