@@ -32,10 +32,9 @@ function App() {
   };
 
   const frequency_map=  {
-    'minutely': 60000,
-    'hourly': 3600000,
     'daily': 86400000,
-    'monthly': 2592000000
+    'monthly': 2592000000,
+    'quarterly': 7776000000,
   }
 
   const handleSubmit = (event) => {
@@ -121,10 +120,9 @@ function App() {
             <label>Frequency:</label>
             <select value={frequency} onChange={handleFrequencyChange}>
               <option value="">Select Frequency</option>
-              <option value="minutely">Minutely</option>
-              <option value="hourly">Hourly</option>
               <option value="daily">Daily</option>
               <option value="monthly">Monthly</option>
+              <option value="quarterly">Quarterly</option>
             </select>
           </div>
           <div className="form-group">

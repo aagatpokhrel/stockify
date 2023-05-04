@@ -16,28 +16,37 @@ import matplotlib.pyplot as plt
 dotenv.load_dotenv()
 
 global subscribers
+global future_predictions
 account_sid = os.getenv("TWILIO_ID")
 auth_token = os.getenv("TWILIO_TOKEN")
 client = Client(account_sid, auth_token)
 
-def send_message(contactValue):
+def send_message(contactValue, loss):
+    if loss:
+        body = "Stock Update: Your stock price is going to fall below the threshold!"
+    else:
+        body = "Stock Update: Your stock price is going to rise above the threshold!"
     message = client.messages.create(
-        body="Stock Update: Your stock price has reached the threshold!",
+        body="{}".format(body),
         from_=os.getenv("TWILIO_NUMBER"),
         to=contactValue
     )
     print(message.sid)
 
-
-def send_email(contactValue):
-	return requests.post(
+def send_email(contactValue, loss):
+    if loss:
+        body = "Stock Update: Your stock price is going to fall below the threshold!"
+    else:
+        body = "Stock Update: Your stock price is going to rise above the threshold!"
+    
+    return requests.post(
 		"https://api.mailgun.net/v3/sandboxcad704a14fe64353921c7593fe72d3e6.mailgun.org/messages",
 		auth=("api", os.getenv("MAIL_KEY")),
 		data={"from": "Mailgun Sandbox <postmaster@sandboxcad704a14fe64353921c7593fe72d3e6.mailgun.org>",
 			"to": "{}".format(contactValue),
 			"subject": "Stock Update",
-			"text": "Your stock price has reached the threshold!"
-        })
+			"text": "{}".format(body=body)}
+    )
 
 def predict_stock(hist):
     values = hist['Close'].values
@@ -89,6 +98,7 @@ def predict_stock(hist):
     # Get the last 60 days of closing prices
     last_60_days = hist['Close'][-60:].values.reshape(-1, 1)
     last_60_days_scaled = scaler.transform(last_60_days)
+    global future_predictions
     future_predictions = []
     for i in range(30):
         X_test = np.reshape(last_60_days_scaled, (1, last_60_days_scaled.shape[0], 1))
@@ -130,19 +140,18 @@ def subscribe():
 @app.route('/getstock', methods=['GET'])
 def getstock():
     global subscribers
-    stock = yf.Ticker(subscribers['stockTicker'])
-    if stock.info['currentPrice'] > int(subscribers['threshold']):
+    global future_predictions
+    if future_predictions[0] > int(subscribers['threshold']):
         if subscribers['contactType'] == 'email':
-            send_email(subscribers['contactValue'])
+            send_email(subscribers['contactValue'], loss=False)
         elif subscribers['contactType'] == 'phone':
-            send_message(subscribers['contactValue'])
+            send_message(subscribers['contactValue'], loss=False)
+    if future_predictions[0] < int(subscribers['threshold']):
+        if subscribers['contactType'] == 'email':
+            send_email(subscribers['contactValue'], loss=True)
+        elif subscribers['contactType'] == 'phone':
+            send_message(subscribers['contactValue'], loss=True)
     
-    data = {
-        "companyName": stock.info['longName'],
-        "currentPrice": stock.info['currentPrice'],
-        "address": stock.info['address1'],
-        "industry": stock.info['industry'],
-        "symbol": stock.info['symbol'],
-    }
-    return jsonify(data)
+    return subscribers
+    
 

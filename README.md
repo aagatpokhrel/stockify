@@ -1,8 +1,7 @@
 
 # Stockify
 
-Notification application, that periodically informs about specific stocks from yahoo finance.
-
+Notification application, that periodically informs about specific stocks from yahoo finance. If the stock price of specified price exceeds the prediction lable then user is notified before hand with the help of email and sms.
 
 
 ## Installation
