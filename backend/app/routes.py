@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 dotenv.load_dotenv()
 
 
-global subscribers
+subscribers = None
 account_sid = os.getenv("TWILIO_ID")
 auth_token = os.getenv("TWILIO_TOKEN")
 client = Client(account_sid, auth_token)
@@ -48,7 +48,7 @@ def send_email(contactValue, loss):
 		data={"from": "Mailgun Sandbox <postmaster@sandboxcad704a14fe64353921c7593fe72d3e6.mailgun.org>",
 			"to": "{}".format(contactValue),
 			"subject": "Stock Update",
-			"text": "{}".format(body=body)}
+			"text": "{}".format(body)}
     )
 
 def predict_stock(hist):
@@ -130,13 +130,20 @@ def getstock():
                 send_message(subscribers['contactValue'], loss=True)
     else:
         pass
+    return future_predictions
 
 def frequency_scheduler():
-    global subscribers
-    frequency = subscribers['frequency']/1000
     while True:
-        time.sleep(frequency)
-        getstock()
+        global subscribers
+        if (subscribers):
+            frequency = subscribers['frequency_val']/1000
+            time.sleep(frequency)
+            getstock()
+
+# Start the background process as a daemon thread
+background_thread = Thread(target=frequency_scheduler)
+background_thread.daemon = True
+background_thread.start()
 
 @app.route('/')
 def index():
@@ -148,9 +155,10 @@ def subscribe():
         data = request.get_json()
         global subscribers
         subscribers = data
+        print (subscribers)
         stock = yf.Ticker(subscribers['stockTicker'])
         hist = stock.history(period='12mo')
-        future_predictions = predict_stock(hist)
+        future_predictions = getstock()
 
         fig,ax = plt.subplots(figsize=(16,8))
         stock_close_values = hist['Close'].values
@@ -165,11 +173,8 @@ def subscribe():
         plt.xticks(rotation=45)
         fig.savefig(f'generated_graph.png')
 
-        return send_file('generated_graph.png', mimetype='image/png')
+        return send_file('../generated_graph.png', mimetype='image/png')
     else:
         return jsonify({'message': 'Error'})
 
-# Start the background process as a daemon thread
-background_thread = Thread(target=frequency_scheduler)
-background_thread.daemon = True
-background_thread.start()
+

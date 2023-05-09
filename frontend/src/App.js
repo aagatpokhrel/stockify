@@ -39,7 +39,7 @@ function App() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    frequency_val = frequency_map[frequency];
+    var frequency_val = frequency_map[frequency];
     axios.post('http://localhost:5000/subscribe', {
       contactType,
       contactValue,

@@ -6,3 +6,6 @@ frontend/.env
 #backend
 backend/.env
 backend/app/__pycache__
+
+#output
+backend/*.png
