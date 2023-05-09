@@ -9,10 +9,10 @@ cors = CORS(app, resources={r"*": {"origins": "*"}})
 app.config['SECRET_KEY'] = "stockify"
 app.config['CORS_HEADERS'] = 'Content-Type'
 
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.sqlite3'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///subscribers.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# db = SQLAlchemy(app)
+db = SQLAlchemy(app)
 
 from app import routes
 
