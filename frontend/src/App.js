@@ -1,6 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { PureComponent, useState, useEffect } from 'react';
 import axios from 'axios';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+
 import './App.css';
+
+function MyLineChart({ data }) {
+  console.log(data)
+  return (
+    <LineChart
+      width={500}
+      height={300}
+      data={data}
+      margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+    >
+      <XAxis dataKey="date" />
+      <YAxis dataKey="price"/>
+      <CartesianGrid strokeDasharray="3 3" />
+      <Tooltip />
+      <Legend />
+      <Line type="monotone" dataKey="price" stroke="#ffffff" />
+    </LineChart>
+  );
+}
+
 
 function App() {
   const [contactType, setContactType] = useState('');
@@ -8,6 +30,7 @@ function App() {
   const [stockTicker, setStockTicker] = useState('');
   const [threshold, setThreshold] = useState('');
   const [frequency, setFrequency] = useState('');
+  const [data, setData] = useState('');
 
   const handleContactTypeChange = (event) => {
     setContactType(event.target.value);
@@ -48,8 +71,10 @@ function App() {
       frequency_val,
     })
       .then((response) => {
-        console.log(response.data);
-        
+        var modified_data = JSON.parse(response.data['stock_hist']).map((d, i) => {
+          return { date: i.toString(), price: d };
+        });
+        setData(modified_data)
       })
       .catch((error) => {
         console.error(error);
@@ -120,6 +145,9 @@ function App() {
             <button type="submit" class="submit">Subscribe</button>
           </div>
         </form>
+      </div>
+      <div className="chart-container">
+        <MyLineChart data={data} />
       </div>
     </div>
   );

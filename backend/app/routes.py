@@ -4,6 +4,7 @@ from flask import jsonify, request
 from app.models import Subscribers
 from threading import Thread
 import time
+import json
 
 def frequency_scheduler():
     while True:
@@ -33,15 +34,19 @@ def subscribe():
             _subscriber.threshold = data['threshold']
             _subscriber.frequency_val = data['frequency_val']
             db.session.commit()
+            stock_hist_json = json.dumps(_subscriber.get_stock_hist()['Close'].values.tolist())
+
             return jsonify({
                 'message': 'Updated your profile stock. You will receive updates on your stock.',
-                'stock_hist': "{}".format(_subscriber.get_stock_hist())
+                'stock_hist': stock_hist_json
             })
         else:
             _subscriber = Subscribers(data['contactType'], data['contactValue'], data['stockTicker'], data['threshold'], data['frequency_val'])
             db.session.add(_subscriber)
             db.session.commit()
+            stock_hist_json = json.dumps(_subscriber.get_stock_hist()['Close'].values.tolist())
+
             return jsonify({
                 'message': 'Added your profile stock. You will receive updates on your stock.',
-                'stock_hist': "{}".format(_subscriber.get_stock_hist())
+                'stock_hist': stock_hist_json
             })
