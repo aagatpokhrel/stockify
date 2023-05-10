@@ -4,6 +4,7 @@ from app.predict import predict_stock
 
 from twilio.rest import Client
 import yfinance as yf
+import time
 
 import requests
 import os
@@ -23,6 +24,7 @@ class Subscribers(db.Model, UserMixin):
     stock_ticker = db.Column(db.Text)
     threshold = db.Column(db.Integer)
     frequency_val = db.Column(db.Integer)
+    last_update = db.Column(db.Float)
 
     def __init__(self, contact_type, contact_value, stock_ticker, threshold, frequency_val):
         self.contact_type = contact_type
@@ -30,6 +32,7 @@ class Subscribers(db.Model, UserMixin):
         self.stock_ticker = stock_ticker
         self.threshold = threshold
         self.frequency_val = frequency_val
+        self.last_update = 0
     
     def get_stock_hist(self):
         stock = yf.Ticker(self.stock_ticker)
@@ -83,4 +86,5 @@ class Subscribers(db.Model, UserMixin):
                     self.send_message(loss)
         else:
             pass
+        self.last_update = time.time()
 

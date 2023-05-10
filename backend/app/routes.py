@@ -10,9 +10,9 @@ def frequency_scheduler():
     while True:
         _subscribers = Subscribers.query.all()
         for subscriber in _subscribers:
-            subscriber.send_update()
-            frequency = subscriber.frequency_val
-            time.sleep(frequency)
+            time_now = time.time()
+            if ((time_now - subscriber.last_update) >= subscriber.frequency_val or subscriber.last_update == 0):
+                subscriber.send_update()
 
 # Start the background process as a daemon thread
 background_thread = Thread(target=frequency_scheduler)
